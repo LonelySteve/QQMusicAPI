@@ -2,6 +2,7 @@
 import base64
 import json
 import os
+import re
 import sys
 from random import random
 from time import time
@@ -168,6 +169,27 @@ class QQMusic(object):
             song = Song(media_mid=media_mid, song_mid=song_mid,
                         title=title, singer=singer, album=album, data=line)
             song_list.append(song)
+        return SongList(song_list)
+
+    def album_songs(self, album_url):
+        r = requests.get(album_url)
+        result = re.search("getSongInfo : (\[.*\])", r.text)
+        if result is None:
+            raise ValueError("指定专辑页面（%s）中未找到有效信息！" % album_url)
+        song_info_list = json.loads(result.group(1))
+
+        def info_filter(info):
+            info.update({"action": {"msg": 0}})
+            return Song(
+                media_mid=info["strMediaMid"],
+                song_mid=info["songmid"],
+                title=info["songname"],
+                singer=info["singer"],
+                album={"name": info["albumname"]},
+                data=info,
+            )
+
+        song_list = [info_filter(item) for item in song_info_list]
         return SongList(song_list)
 
 
