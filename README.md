@@ -1,70 +1,133 @@
 # QQMusicAPI
-网页QQ音乐的一些API
 
-本项目仅用于个人学习，禁止任何形式的商用，也不得将此项目用于学习以外的其他用途。
-
-## 使用方法
-
-### QQMusic
+## Song
 
 ```python
->>> from QQMusic import QQMusic
->>> qqmusic = QQMusic()
->>> song_list = qqmusic.search_song('世界ノ歌')
->>> song_list
-<QQMusic.SongList object at 0x7f9808406f98>
->>> print(song_list)
-0. Weight of the World/壊レタ世界ノ歌 (Weight of the World/破灭的世界之歌) - 河野マリナ  < NieR:Automata Original Soundtrack >
-1. 世界を変えるピアノが歌う - 末光篤 / 松本素生  < 色彩協奏曲 Colors Of Concerto >
-2. 君のにる为赠诗 - RomariaCrusade  < 秋篝ノ歌 >
-3. 落叶ぱねろ - 葉月ゆら  < 秋篝ノ歌 >
-4. 刃 - RomariaCrusade  < 秋篝ノ歌 >
-5. 守唄 - RomariaCrusade  < 秋篝ノ歌 >
-6. 生死の誾 - RomariaCrusade  < 秋篝ノ歌 >
-7. RPG - RomariaCrusade  < 秋篝ノ歌 >
-8. 月と死神 (Another Moon Ver) - RomariaCrusade  < 秋篝ノ歌 >
-9. 秋篝ノ歌 - RomariaCrusade  < 秋篝ノ歌 >
->>> song_list[0].save(path='song')
-download: Weight of the World/壊レタ世界ノ歌 (Weight of the World/破灭的世界之歌) ------ 歌曲下载完成
-True
->>> song_list.add(song_list[7])
->>> print(song_list)
-0. Weight of the World/壊レタ世界ノ歌 (Weight of the World/破灭的世界之歌) - 河野マリナ  < NieR:Automata Original Soundtrack >
-1. 世界を変えるピアノが歌う - 末光篤 / 松本素生  < 色彩協奏曲 Colors Of Concerto >
-2. 君のにる为赠诗 - RomariaCrusade  < 秋篝ノ歌 >
-3. 落叶ぱねろ - 葉月ゆら  < 秋篝ノ歌 >
-4. 刃 - RomariaCrusade  < 秋篝ノ歌 >
-5. 守唄 - RomariaCrusade  < 秋篝ノ歌 >
-6. 生死の誾 - RomariaCrusade  < 秋篝ノ歌 >
-7. RPG - RomariaCrusade  < 秋篝ノ歌 >
-8. 月と死神 (Another Moon Ver) - RomariaCrusade  < 秋篝ノ歌 >
-9. 秋篝ノ歌 - RomariaCrusade  < 秋篝ノ歌 >
-10. RPG - RomariaCrusade  < 秋篝ノ歌 >
->>> song_list.save()
-download: Weight of the World/壊レタ世界ノ歌 (Weight of the World/破灭的世界之歌) ------ 歌曲下载完成
-download: 世界を変えるピアノが歌う ------ 歌曲下载完成
-download: 君のにる为赠诗 ------ 歌曲下载完成
-download: 落叶ぱねろ ------ 歌曲下载完成
-download: 刃 ------ 歌曲下载完成
-download: 守唄 ------ 歌曲下载完成
-download: 生死の誾 ------ 歌曲下载完成
-download: RPG ------ 歌曲下载完成
-download: 月と死神 (Another Moon Ver) ------ 歌曲下载完成
-download: 秋篝ノ歌 ------ 歌曲下载完成
-download: RPG ------ 歌曲下载完成
->>> song_list[7].lrc_save()
-download lrc: RPG ------ 歌词下载完成
-True
+from QQMusicAPI import Song
+
+# 参数为歌曲的 mid
+# 可以在网页 QQ 音乐获得
+# 比如林俊杰的《那些你很冒险的梦》
+# https://y.qq.com/n/yqq/song/002kADrZ01iC2L.html
+# mid 就是 002kADrZ01iC2L
+song = Song('002kADrZ01iC2L')
+
+# 获得歌曲信息
+song.extract()
+song.lyric
+song.image
+song.song_id
+song.info
+# 热门评论
+song.hot_comment
+# 评论总数
+song.comment_total
+
+# 获取某页评论
+song.comment_page(1)
+
+# 获得歌曲的歌词
+# 格式为 {lyric: ..., trans: ...}
+song.get_lyric()
+# 歌曲主页链接
+song.url
+# 歌曲下载链接，有时效性
+# 每次请求重新获取
+song.song_url
 ```
 
+## Search
 
-## 未来可能会添加的功能
+```python
+from QQMusicAPI import Search
 
-- 获得播放歌曲的具体信息（时长、已播放时间等）。
-- 专辑、歌单、排行榜等信息（很简单，看什么时候有空吧）。
-- 重新整理一遍逻辑
+search = Search('年少有为')
 
+# 关键词的结果个数
+search.total_num
+# 关键词的结果页数
+search.page_size
+# 获取某页数据: list(Song)
+search.page(1)
+```
 
-## 已知问题
+## Rank
 
-- 在获取歌曲失败的时候（比如 vkey 认证未通过、网络错误等）没有完整的提示。
+```python
+from QQMusicAPI import Rank, RankType
+
+# 直接 get 可以获得最近一期的数据
+rank = Rank().get()
+print(rank[0].title)
+rank = Rank(RankType.巅峰榜_欧美).get()
+print(rank[0].title)
+rank = Rank(RankType.巅峰榜_流行指数).get()
+print(rank[0].title)
+rank = Rank(RankType.巅峰榜_内地).get()
+print(rank[0].title)
+rank = Rank(RankType.巅峰榜_港台).get()
+print(rank[0].title)
+rank = Rank(RankType.巅峰榜_韩国).get()
+print(rank[0].title)
+rank = Rank(RankType.巅峰榜_日本).get()
+print(rank[0].title)
+rank = Rank(RankType.巅峰榜_热歌).get()
+print(rank[0].title)
+rank = Rank(RankType.巅峰榜_新歌).get()
+print(rank[0].title)
+rank = Rank(RankType.巅峰榜_网络歌曲).get()
+print(rank[0].title)
+rank = Rank(RankType.巅峰榜_影视金曲).get()
+print(rank[0].title)
+rank = Rank(RankType.巅峰榜_K歌金曲).get()
+print(rank[0].title)
+rank = Rank(RankType.巅峰榜_腾讯音乐人原创榜).get()
+print(rank[0].title)
+rank = Rank(RankType.说唱榜).get()
+print(rank[0].title)
+rank = Rank(RankType.台湾Hito中文榜).get()
+print(rank[0].title)
+rank = Rank(RankType.日本公信榜).get()
+print(rank[0].title)
+rank = Rank(RankType.韩国Mnet榜).get()
+print(rank[0].title)
+rank = Rank(RankType.英国UK榜).get()
+print(rank[0].title)
+rank = Rank(RankType.美国公告牌榜).get()
+print(rank[0].title)
+rank = Rank(RankType.香港电台榜).get()
+print(rank[0].title)
+rank = Rank(RankType.香港商台榜).get()
+print(rank[0].title)
+rank = Rank(RankType.美国iTunes榜).get()
+print(rank[0].title)
+
+# 可以查看可用的所有的日期
+rank = Rank(RankType.巅峰榜_内地)
+print(rank.date_list)  # 所有可用日期
+rank_list = rank.get(rank.date_list[1])  # 获取指定日期的数据
+print(rank_list[0].title)
+
+```
+
+## Singer
+
+```python
+from QQMusicAPI import Singer
+
+# 参数要求 mid
+# 以林俊杰为例：
+# https://y.qq.com/n/yqq/singer/001BLpXF2DyJe2.html
+singer = Singer('001BLpXF2DyJe2')
+
+# 获取歌手信息
+singer.extract()
+print(singer.name)
+print(singer.info)
+print(singer.basic)
+print(singer.other)
+
+# 获取歌手所有歌曲
+song_list = singer.song_all()
+print(song_list[0].title)
+```
